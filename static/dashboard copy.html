@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Project Studio</title>
+  <style>
+    :root{--bg:#f8fafc;--card:#fff;--sensor:#3b82f6;--act:#ef4444;--accent:#10b981;--prompt:#f1f5f9}
+    body{margin:0;font:16px system-ui;background:var(--bg);color:#222;min-height:100dvh;display:grid;grid-template-rows:auto 1fr auto auto}
+    header,footer{padding:1rem;background:#111;color:#fff;display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+    .btn{padding:.75rem 1rem;border:none;border-radius:.75rem;background:#333;color:#fff;cursor:pointer}
+    .btn.primary{background:var(--accent)}
+    #canvas{position:relative;overflow:hidden;background:var(--bg);min-height:50vh;border:2px dashed #ccc}
+    .card{width:150px;padding:1rem;background:var(--card);border-radius:1rem;box-shadow:0 10px 30px #0003;position:absolute;cursor:move;z-index:10}
+    .sensor{background:var(--sensor);color:white}
+    .act{background:var(--act);color:white}
+    .name{font-weight:700;outline:none}
+    .value{font-size:1.8em;text-align:center}
+    #prompt-box{background:var(--prompt);padding:1.5rem;border-top:3px solid var(--accent)}
+    textarea{width:100%;height:100px;padding:1rem;border:2px solid #ccc;border-radius:1rem;font:inherit;resize:none}
+    .live-dot{width:10px;height:10px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{50%{opacity:.3}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>AI Project Studio</h1>
+  <div><span class="live-dot"></span> LIVE</div>
+</header>
+
+<div id="canvas"></div>
+
+<div id="prompt-box">
+  <h3>Describe what your Arduino project should do:</h3>
+  <p style="color:#666;font-size:14px;margin:0 0 1rem 0">AI will analyze all components on your canvas and generate complete Arduino code based on your description.</p>
+  <textarea id="prompt" placeholder="e.g. When motion is detected, turn on LED for 5 seconds and sound buzzer. If temperature is above 30°C, activate the relay for watering."></textarea>
+  <div style="margin-top:1rem">
+    <button class="btn primary" onclick="askAI()">GENERATE ARDUINO CODE</button>
+    <span id="ai-status" style="margin-left:1rem;color:#666"></span>
+  </div>
+</div>
+
+<footer>
+  <select id="component-select">
+    <option value="">+ Add Component</option>
+    <option value="Soil">Soil Sensor</option>
+    <option value="Temp">Temperature</option>
+    <option value="Light">Light Sensor</option>
+    <option value="Motion">Motion PIR</option>
+    <option value="Button">Push Button</option>
+    <option value="LED">LED</option>
+    <option value="Relay">Relay/Pump</option>
+    <option value="Servo">Servo Motor</option>
+    <option value="Buzzer">Buzzer</option>
+  </select>
+  <button class="btn primary" onclick="save()">SAVE</button>
+  <button class="btn primary" onclick="downloadCode()">DOWNLOAD .INO</button>
+</footer>
+
+<script>
+let items = [], drag = null;
+const canvas = document.getElementById('canvas');
+const select = document.getElementById('component-select');
+const status = document.getElementById('ai-status');
+
+fetch('/api/project').then(r => r.json()).then(d => { items = d; render(); });
+
+function render() {
+  canvas.innerHTML = '';
+  items.forEach((it, i) => {
+    const card = document.createElement('div');
+    card.className = `card ${it.type}`;
+    card.style.left = (it.x || 100) + 'px';
+    card.style.top = (it.y || 100) + 'px';
+    card.innerHTML = `
+      <div class="name" contenteditable onblur="items[${i}].name=this.innerText">${it.name || it.kind}</div>
+      <div class="value">${it.type === 'sensor' ? '--' : ''}</div>
+      ${it.type === 'sensor' ? `
+        <input type="range" min="0" max="100" value="${it.thresh || 50}"
+               oninput="items[${i}].thresh=this.value; this.nextElementSibling.innerText='Trigger: '+this.value+'%'">
+        <div>Trigger: ${it.thresh || 50}%</div>
+      ` : ''}
+      <small>Pin: <span contenteditable onblur="items[${i}].pin=this.innerText">${it.pin || '2'}</span></small>
+      <button onclick="items.splice(${i},1); render()" style="float:right;background:#ff4444;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer">×</button>
+    `;
+    card.onpointerdown = e => startDrag(e, i);
+    canvas.appendChild(card);
+  });
+}
+
+select.onchange = function() {
+  const type = this.value;
+  if (!type) return;
+  items.push({
+    name: type,
+    type: ["Soil","Temp","Light","Motion","Button"].includes(type) ? "sensor" : "act",
+    kind: type,
+    pin: "2",
+    x: Math.random() * (canvas.offsetWidth - 160) + 20,
+    y: Math.random() * (canvas.offsetHeight - 200) + 20,
+    thresh: 50,
+    sec: 2
+  });
+  render();
+  this.value = "";
+};
+
+function startDrag(e, i) {
+  e.preventDefault();
+  drag = i;
+  const card = e.currentTarget;
+  const rect = canvas.getBoundingClientRect();
+  const startX = e.clientX - card.offsetLeft;
+  const startY = e.clientY - card.offsetTop;
+
+  const move = e => {
+    let x = e.clientX - startX - rect.left;
+    let y = e.clientY - startY - rect.top;
+    x = Math.max(0, Math.min(x, canvas.offsetWidth - 160));
+    y = Math.max(0, Math.min(y, canvas.offsetHeight - 200));
+    items[drag].x = x;
+    items[drag].y = y;
+    card.style.left = x + 'px';
+    card.style.top = y + 'px';
+  };
+
+  const up = () => {
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+  };
+
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+}
+
+function save() {
+  fetch('/api/project', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(items)
+  }).then(() => alert('Saved! Now write your prompt and click ASK AI to generate code.'));
+}
+
+function downloadCode() {
+  if (!window.generatedCode) {
+    alert("Please write a prompt and click GENERATE ARDUINO CODE first to generate Arduino code!");
+    return;
+  }
+
+  // Create a blob with the generated code
+  const blob = new Blob([window.generatedCode], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+
+  // Create a temporary download link
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'arduino_project.ino';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Clean up the URL object
+  URL.revokeObjectURL(url);
+
+  status.textContent = "Downloaded! Upload to Arduino IDE.";
+  setTimeout(() => status.textContent = "", 3000);
+}
+
+async function askAI() {
+  const prompt = document.getElementById('prompt').value.trim();
+  if (!prompt) return alert("Write your idea!");
+
+  status.textContent = "AI generating Arduino code...";
+  console.log("Starting AI code generation...");
+
+  // Show all components on canvas
+  let componentsDescription = "Components on canvas:\n";
+  items.forEach((item, index) => {
+    componentsDescription += `${index + 1}. ${item.kind} on pin ${item.pin}`;
+    if (item.thresh) componentsDescription += ` (threshold: ${item.thresh})`;
+    if (item.sec) componentsDescription += ` (duration: ${item.sec}s)`;
+    componentsDescription += "\n";
+  });
+
+  console.log("Components:", componentsDescription);
+  console.log("User prompt:", prompt);
+
+  try {
+    const res = await fetch('/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, layout: items })
+    });
+
+    console.log("Fetch response status:", res.status);
+    console.log("Response ok:", res.ok);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    console.log("Response data:", data);
+    console.log("Data has code property:", 'code' in data);
+    console.log("Code type:", typeof data.code);
+
+    if (data.success) {
+      // Store the generated code for download
+      window.generatedCode = data.code;
+      window.userPrompt = prompt;
+
+      console.log("Code generated successfully, length:", data.code ? data.code.length : 'undefined');
+
+      status.textContent = "Arduino code generated! Click DOWNLOAD to get your .ino file";
+      status.style.color = "#10b981"; // Green color for success
+
+      // Auto-enable download button
+      const downloadBtn = document.querySelector('button[onclick*="download"]');
+      if (downloadBtn) {
+        downloadBtn.style.background = "#10b981";
+        downloadBtn.textContent = "DOWNLOAD .INO (Ready!)";
+      }
+
+      // Optional: Show code preview in console
+      console.log("Generated Arduino Code:", data.code);
+
+      if (data.fallback) {
+        status.textContent += " (using fallback template)";
+        status.style.color = "#f59e0b"; // Orange for fallback
+      }
+    } else {
+      console.error("AI generation failed:", data.error || data);
+      status.textContent = "AI generation failed: " + (data.error || "Unknown error");
+      status.style.color = "#ef4444"; // Red for error
+    }
+  } catch (error) {
+    console.error("Error in askAI:", error);
+    status.textContent = "Error: " + error.message;
+    status.style.color = "#ef4444";
+  }
+}
+</script>
+</body>
+</html>

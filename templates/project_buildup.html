@@ -1,0 +1,229 @@
+{% extends "studio_base.html" %}
+{% block body %}
+<style>
+  .main-container {
+    display: flex;
+    height: 100vh;
+    background: #f0f4f8;
+    position: relative;
+  }
+  #right-sidemenu {
+    width: 480px;
+    background: #fff;
+    color: #222;
+    padding: 2rem 2rem;
+    box-shadow: -2px 0 8px #0001;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    z-index: 100;
+  }
+  .main-container > #canvas {
+    margin-left: 240px;
+    margin-right: 500px;
+  }
+  #canvas {
+    width: 480px;
+    height: 340px;
+    background: #fff;
+    margin: 2rem 2rem 2rem 0;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #0001;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #canvas h3 {
+    color: #bbb;
+    text-align: center;
+    margin: 0;
+    font-size: 1.1em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  #components-list {
+    margin-bottom: 1rem;
+  }
+  #components-list h4 {
+    margin-bottom: 1rem;
+    color: #4361ee;
+    font-size: 1.1em;
+  }
+  #components-list .component {
+    background: #4361ee;
+    color: #fff;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: .75rem;
+    cursor: grab;
+    user-select: none;
+    font-size: 1em;
+    border: none;
+    box-shadow: 0 1px 4px #4361ee22;
+    transition: background 0.2s;
+  }
+  #components-list .component:hover {
+    background: #2746b0;
+  }
+  .placed-component {
+    position: absolute;
+    min-width: 80px;
+    min-height: 30px;
+    background: #e3e3e3;
+    border: 1px solid #bbb;
+    border-radius: .75rem;
+    padding: 8px;
+    cursor: move;
+    box-shadow: 0 1px 4px #0001;
+    z-index: 1;
+    color: #222;
+    font-size: 1em;
+    text-align: center;
+  }
+  #documents-upload h4, #program-generation h4 {
+    color: #4361ee;
+    margin-bottom: .5rem;
+    font-size: 1.1em;
+  }
+  #prompt {
+    width: 100%;
+    min-height: 120px;
+    margin-bottom: .5rem;
+    border-radius: .5rem;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    font-size: 1.15em;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+  #generate, #download-pdf, #save-program {
+    width: 100%;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid #4361ee;
+    background: #4361ee;
+    color: #fff;
+    font-size: 1.15em;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: .75rem;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px #4361ee22;
+  }
+  #generate:hover, #download-pdf:hover, #save-program:hover {
+    background: #2746b0;
+  }
+  #code {
+    width: 100%;
+    min-height: 80px;
+    border-radius: .5rem;
+    border: 1px solid #ddd;
+    padding: .5rem;
+    font-size: 1em;
+    box-sizing: border-box;
+    margin-top: .5rem;
+    background: #f0f4f8;
+    color: #222;
+  }
+</style>
+<div class="main-container">
+  <div id="canvas">
+    <h3>Drag components here</h3>
+  </div>
+  <aside id="right-sidemenu">
+    <div id="components-list">
+      <h4>Components</h4>
+      <div class="component" draggable="true" data-kind="Temp">Temperature Sensor</div>
+      <div class="component" draggable="true" data-kind="Soil">Soil Moisture Sensor</div>
+      <div class="component" draggable="true" data-kind="Light">Light Sensor</div>
+      <div class="component" draggable="true" data-kind="Motion">Motion Sensor</div>
+      <div class="component" draggable="true" data-kind="Button">Button</div>
+      <div class="component" draggable="true" data-kind="LED">LED</div>
+      <div class="component" draggable="true" data-kind="Relay">Relay</div>
+      <div class="component" draggable="true" data-kind="Buzzer">Buzzer</div>
+      <div class="component" draggable="true" data-kind="Servo">Servo</div>
+    </div>
+    <div id="documents-upload">
+      <h4>Upload Documents</h4>
+      <input type="file" id="doc-upload" multiple>
+    </div>
+    <div id="program-generation">
+      <h4>Generate Program</h4>
+      <textarea id="prompt" placeholder="Describe your project (e.g., 'Turn on LED when temp > 30°C')"></textarea>
+      <button id="generate">Generate Program</button>
+      <button id="download-pdf">Download PDF</button>
+      <button id="save-program">Save Program</button>
+    </div>
+    <textarea id="code" readonly placeholder="Generated Arduino code will appear here"></textarea>
+  </aside>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Drag from sidebar
+  const components = document.querySelectorAll('#components-list .component');
+  const canvas = document.getElementById('canvas');
+  let draggedKind = null;
+
+  components.forEach(c => {
+    c.addEventListener('dragstart', e => {
+      draggedKind = c.dataset.kind;
+    });
+  });
+
+  canvas.addEventListener('dragover', e => {
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!draggedKind) return;
+    const x = e.offsetX;
+    const y = e.offsetY;
+    const newElem = document.createElement('div');
+    newElem.className = 'placed-component';
+    newElem.style.left = x + 'px';
+    newElem.style.top = y + 'px';
+    newElem.textContent = draggedKind;
+    makeDraggable(newElem);
+    canvas.appendChild(newElem);
+    draggedKind = null;
+  });
+
+  function makeDraggable(elem) {
+    let offsetX, offsetY, isDragging = false;
+    elem.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+      elem.style.zIndex = 1000;
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      const rect = canvas.getBoundingClientRect();
+      let x = e.clientX - rect.left - offsetX;
+      let y = e.clientY - rect.top - offsetY;
+      // Keep inside canvas
+      x = Math.max(0, Math.min(x, canvas.clientWidth - elem.offsetWidth));
+      y = Math.max(0, Math.min(y, canvas.clientHeight - elem.offsetHeight));
+      elem.style.left = x + 'px';
+      elem.style.top = y + 'px';
+    });
+    document.addEventListener('mouseup', function() {
+      isDragging = false;
+      elem.style.zIndex = 1;
+    });
+  }
+});
+</script>
+{% endblock %}

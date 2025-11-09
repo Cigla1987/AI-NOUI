@@ -1,0 +1,3 @@
+i wan this app that it can communicate with arduino via websocket. AI needs to read values from sensors and control other components. 
+on left side i want sidemenu with buttons create project, project overview, load project, settings. 
+On ride side i want sidemenu for project buildup. were first button are components, then documents upload which ai can read. then generating program where user can write additional promt, generate program, downloading pdf and saving program
