@@ -5,224 +5,425 @@
     display: flex;
     height: 100vh;
     background: #f0f4f8;
-    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
-  #right-sidemenu {
-    width: 480px;
-    background: #fff;
-    color: #222;
-    padding: 2rem 2rem;
-    box-shadow: -2px 0 8px #0001;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    overflow-y: auto;
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    z-index: 100;
-  }
-  .main-container > #canvas {
-    margin-left: 240px;
-    margin-right: 500px;
-  }
+
   #canvas {
-    width: 480px;
-    height: 340px;
+    flex: 1;
     background: #fff;
-    margin: 2rem 2rem 2rem 0;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px #0001;
+    margin: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px #0002, 0 2px 8px #4361ee22;
+    border: 2px solid #e0e4ea;
     position: relative;
     overflow: hidden;
-    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
+
   #canvas h3 {
-    color: #bbb;
-    text-align: center;
-    margin: 0;
-    font-size: 1.1em;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    color: #cbd5e0;
+    font-size: 1.4em;
     pointer-events: none;
+    font-weight: 500;
   }
-  #components-list {
-    margin-bottom: 1rem;
+
+  /* WIDER & CLEANER RIGHT SIDEBAR */
+  #right-sidemenu {
+     width: 500px;
+    background: #ffffff;
+    border-left: 2px solid #e0e4ea;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
   }
-  #components-list h4 {
-    margin-bottom: 1rem;
+
+  .sidebar-header {
+    padding: 1.8rem 1.8rem 1rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a202c;
+  }
+
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.8rem;
+    padding-bottom: 2rem;
+    background: #ffffff;
+  }
+
+  /* Section Titles */
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
     color: #4361ee;
-    font-size: 1.1em;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
-  #components-list .component {
-    background: #4361ee;
-    color: #fff;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: .75rem;
+
+  .section-title svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Components Grid */
+  #components-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  .component {
+    background: #ffffff;
+    color: #2d3748;
+    padding: 0.9rem 0.7rem;
+    border-radius: 12px;
     cursor: grab;
     user-select: none;
-    font-size: 1em;
-    border: none;
-    box-shadow: 0 1px 4px #4361ee22;
-    transition: background 0.2s;
-  }
-  #components-list .component:hover {
-    background: #2746b0;
-  }
-  .placed-component {
-    position: absolute;
-    min-width: 80px;
-    min-height: 30px;
-    background: #e3e3e3;
-    border: 1px solid #bbb;
-    border-radius: .75rem;
-    padding: 8px;
-    cursor: move;
-    box-shadow: 0 1px 4px #0001;
-    z-index: 1;
-    color: #222;
-    font-size: 1em;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(67,97,238,0.1);
+    transition: all 0.25s ease;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
   }
-  #documents-upload h4, #program-generation h4 {
-    color: #4361ee;
-    margin-bottom: .5rem;
-    font-size: 1.1em;
+
+  .component:hover {
+    background: #4361ee;
+    color: white;
+    border-color: #4361ee;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(67,97,238,0.3);
   }
+
+  .component:active {
+    cursor: grabbing;
+    transform: translateY(-1px);
+  }
+
+  .component svg {
+    width: 24px;
+    height: 24px;
+    opacity: 0.85;
+  }
+
+  /* Upload */
+  #documents-upload {
+    margin-bottom: 2rem;
+  }
+
+  #doc-upload {
+    width: 100%;
+    padding: 1rem;
+    border: 2px dashed #a0aec0;
+    border-radius: 12px;
+    background: #f7fafc;
+    font-size: 0.95rem;
+    color: #4a5568;
+    transition: all 0.2s;
+  }
+
+  #doc-upload:focus {
+    outline: none;
+    border-color: #4361ee;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(67,97,238,0.15);
+  }
+
+  /* Prompt Area - BIG & COMFORTABLE */
   #prompt {
     width: 100%;
-    min-height: 120px;
-    margin-bottom: .5rem;
-    border-radius: .5rem;
-    border: 1px solid #ddd;
-    padding: 1rem;
-    font-size: 1.15em;
-    box-sizing: border-box;
+    min-height: 220px;
+    padding: 1.2rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 1rem;
+    line-height: 1.6;
     resize: vertical;
+    background: #ffffff;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
   }
-  #generate, #download-pdf, #save-program {
-    width: 100%;
-    padding: 1.25rem;
-    border-radius: 1rem;
-    border: 1px solid #4361ee;
-    background: #4361ee;
-    color: #fff;
-    font-size: 1.15em;
-    font-weight: 500;
+
+  #prompt:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 4px rgba(67,97,238,0.15);
+  }
+
+  /* Buttons */
+  .btn-group {
+    display: flex;
+    gap: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
-    margin-bottom: .75rem;
-    transition: background 0.2s;
-    box-shadow: 0 2px 8px #4361ee22;
+    transition: all 0.25s;
+    border: none;
   }
-  #generate:hover, #download-pdf:hover, #save-program:hover {
-    background: #2746b0;
+
+  .btn-primary {
+    background: #4361ee;
+    color: white;
   }
+
+  .btn-primary:hover {
+    background: #3651d4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(67,97,238,0.35);
+  }
+
+  .btn-secondary {
+    background: #ffffff;
+    color: #4361ee;
+    border: 2px solid #4361ee;
+  }
+
+  .btn-secondary:hover {
+    background: #4361ee;
+    color: white;
+  }
+
+  /* Code Output */
   #code {
     width: 100%;
-    min-height: 80px;
-    border-radius: .5rem;
-    border: 1px solid #ddd;
-    padding: .5rem;
-    font-size: 1em;
-    box-sizing: border-box;
-    margin-top: .5rem;
-    background: #f0f4f8;
-    color: #222;
+    min-height: 260px;
+    padding: 1.2rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    resize: vertical;
+  }
+
+  #code::placeholder {
+    color: #666;
+  }
+
+  /* Placed components on canvas */
+  .placed-component {
+    position: absolute;
+    min-width: 100px;
+    min-height: 48px;
+    background: #dbeafe;
+    border: 2px solid #4361ee;
+    border-radius: 14px;
+    padding: 10px 14px;
+    cursor: move;
+    box-shadow: 0 6px 16px rgba(67,97,238,0.25);
+    z-index: 10;
+    color: #1e40af;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Responsive */
+  @media (max-width: 1400px) {
+    #right-sidemenu { width: 340px; }
+  }
+  @media (max-width: 1100px) {
+    #right-sidemenu { width: 100%; max-width: 380px; }
+    .main-container { flex-direction: column; }
+    #canvas { margin: 1.5rem; min-height: 500px; }
   }
 </style>
+
 <div class="main-container">
   <div id="canvas">
-    <h3>Drag components here</h3>
+    <h3>Drag components here to build your circuit</h3>
   </div>
+
   <aside id="right-sidemenu">
-    <div id="components-list">
-      <h4>Components</h4>
-      <div class="component" draggable="true" data-kind="Temp">Temperature Sensor</div>
-      <div class="component" draggable="true" data-kind="Soil">Soil Moisture Sensor</div>
-      <div class="component" draggable="true" data-kind="Light">Light Sensor</div>
-      <div class="component" draggable="true" data-kind="Motion">Motion Sensor</div>
-      <div class="component" draggable="true" data-kind="Button">Button</div>
-      <div class="component" draggable="true" data-kind="LED">LED</div>
-      <div class="component" draggable="true" data-kind="Relay">Relay</div>
-      <div class="component" draggable="true" data-kind="Buzzer">Buzzer</div>
-      <div class="component" draggable="true" data-kind="Servo">Servo</div>
+    <div class="sidebar-header">
+      <h3>Arduino Project Studio</h3>
     </div>
-    <div id="documents-upload">
-      <h4>Upload Documents</h4>
-      <input type="file" id="doc-upload" multiple>
+
+    <div class="sidebar-content">
+      <!-- Components -->
+      <div class="section-title">
+        <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/></svg>
+        Components
+      </div>
+      <div id="components-list">
+        <div class="component" draggable="true" data-kind="Temp">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a1 1 0 0 0-1 1v9.5a3.5 3.5 0 1 0 2 0V3a1 1 0 0 0-1-1z"/></svg>
+          Temperature
+        </div>
+        <div class="component" draggable="true" data-kind="Soil">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 12h3v8h14v-8h3L12 2z"/></svg>
+          Soil Moisture
+        </div>
+        <div class="component" draggable="true" data-kind="Light">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+          Light Sensor
+        </div>
+        <div class="component" draggable="true" data-kind="Motion">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/></svg>
+          Motion
+        </div>
+        <div class="component" draggable="true" data-kind="Button">
+          <svg fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="4" rx="2"/></svg>
+          Button
+        </div>
+        <div class="component" draggable="true" data-kind="LED">
+          <svg fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2m8-8h2M4 12H2m15.364-6.364l1.414-1.414M6.222 17.778l-1.414 1.414m0-12.728L6.222 6.636m11.556 11.556l1.414 1.414"/></svg>
+          LED
+        </div>
+        <div class="component" draggable="true" data-kind="Relay">
+          <svg fill="currentColor" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2"/></svg>
+          Relay
+        </div>
+        <div class="component" draggable="true" data-kind="Buzzer">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+          Buzzer
+        </div>
+        <div class="component" draggable="true" data-kind="Servo">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/></svg>
+          Servo
+        </div>
+      </div>
+
+      <!-- Upload -->
+      <div id="documents-upload">
+        <div class="section-title">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
+          Upload Documents
+        </div>
+        <input type="file" id="doc-upload" multiple accept=".pdf,.docx,.txt,.jpg,.png,.ino">
+      </div>
+
+      <!-- Generate Program -->
+      <div id="program-generation">
+        <div class="section-title">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M9.5 3A1.5 1.5 0 0 0 8 4.5v15A1.5 1.5 0 0 0 9.5 21h9A1.5 1.5 0 0 0 20 19.5v-15A1.5 1.5 0 0 0 18.5 3h-9z"/></svg>
+          Generate Arduino Code
+        </div>
+
+        <textarea id="prompt" placeholder="Describe what you want your project to do. Be specific!
+
+Examples:
+• Turn on the LED when temperature exceeds 30°C
+• Activate buzzer if motion is detected at night
+• Water the plant when soil moisture drops below 40%
+• Open the servo gate when button is pressed twice
+• Log light level every 10 seconds and blink LED if too dark
+• Turn relay ON for 5 seconds when soil is dry"></textarea>
+
+        <div class="btn-group">
+          <button id="generate" class="btn btn-primary">Generate Code</button>
+          <button id="download-pdf" class="btn btn-secondary">Download PDF</button>
+          <button id="save-program" class="btn btn-secondary">Save Project</button>
+        </div>
+      </div>
+
+      <!-- Code Output -->
+      <textarea id="code" readonly placeholder="// Your generated Arduino code will appear here...
+// Connect your components and click 'Upload to Arduino' when ready!
+
+void setup() {
+  // Your setup code
+}
+
+void loop() {
+  // Your main logic
+}"></textarea>
     </div>
-    <div id="program-generation">
-      <h4>Generate Program</h4>
-      <textarea id="prompt" placeholder="Describe your project (e.g., 'Turn on LED when temp > 30°C')"></textarea>
-      <button id="generate">Generate Program</button>
-      <button id="download-pdf">Download PDF</button>
-      <button id="save-program">Save Program</button>
-    </div>
-    <textarea id="code" readonly placeholder="Generated Arduino code will appear here"></textarea>
   </aside>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Drag from sidebar
-  const components = document.querySelectorAll('#components-list .component');
+  const components = document.querySelectorAll('.component');
   const canvas = document.getElementById('canvas');
   let draggedKind = null;
 
   components.forEach(c => {
     c.addEventListener('dragstart', e => {
       draggedKind = c.dataset.kind;
+      c.style.opacity = '0.5';
+    });
+    c.addEventListener('dragend', () => {
+      c.style.opacity = '1';
     });
   });
 
-  canvas.addEventListener('dragover', e => {
-    e.preventDefault();
-  });
-
+  canvas.addEventListener('dragover', e => e.preventDefault());
   canvas.addEventListener('drop', e => {
     e.preventDefault();
     if (!draggedKind) return;
-    const x = e.offsetX;
-    const y = e.offsetY;
-    const newElem = document.createElement('div');
-    newElem.className = 'placed-component';
-    newElem.style.left = x + 'px';
-    newElem.style.top = y + 'px';
-    newElem.textContent = draggedKind;
-    makeDraggable(newElem);
-    canvas.appendChild(newElem);
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left - 50;
+    const y = e.clientY - rect.top - 24;
+
+    const el = document.createElement('div');
+    el.className = 'placed-component';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.textContent = draggedKind;
+    makeDraggable(el);
+    canvas.appendChild(el);
+
     draggedKind = null;
   });
 
-  function makeDraggable(elem) {
-    let offsetX, offsetY, isDragging = false;
-    elem.addEventListener('mousedown', function(e) {
-      isDragging = true;
-      offsetX = e.offsetX;
-      offsetY = e.offsetY;
-      elem.style.zIndex = 1000;
+  function makeDraggable(el) {
+    let posX = 0, posY = 0, initX = 0, initY = 0;
+
+    el.addEventListener('mousedown', e => {
+      if (e.target !== el) return;
+      initX = e.clientX - posX;
+      initY = e.clientY - posY;
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', stop);
+      el.style.zIndex = 1000;
     });
-    document.addEventListener('mousemove', function(e) {
-      if (!isDragging) return;
+
+    function move(e) {
+      posX = e.clientX - initX;
+      posY = e.clientY - initY;
       const rect = canvas.getBoundingClientRect();
-      let x = e.clientX - rect.left - offsetX;
-      let y = e.clientY - rect.top - offsetY;
-      // Keep inside canvas
-      x = Math.max(0, Math.min(x, canvas.clientWidth - elem.offsetWidth));
-      y = Math.max(0, Math.min(y, canvas.clientHeight - elem.offsetHeight));
-      elem.style.left = x + 'px';
-      elem.style.top = y + 'px';
-    });
-    document.addEventListener('mouseup', function() {
-      isDragging = false;
-      elem.style.zIndex = 1;
-    });
+      posX = Math.max(0, Math.min(posX, rect.width - el.offsetWidth));
+      posY = Math.max(0, Math.min(posY, rect.height - el.offsetHeight));
+      el.style.left = posX + 'px';
+      el.style.top = posY + 'px';
+    }
+
+    function stop() {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', stop);
+      el.style.zIndex = 10;
+    }
   }
 });
 </script>
